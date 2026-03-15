@@ -1,6 +1,11 @@
 from flask import Flask, render_template, request
+from newspaper import Article
+from transformers import pipeline
 
 app = Flask(__name__)
+
+# Load summarization model once
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -11,11 +16,23 @@ def home():
     if request.method == "POST":
         article_url = request.form.get("article_url")
 
-        if not article_url:
-            error = "Please provide a valid URL."
-        else:
-            # temporary placeholder
-            summary = "Summary will appear here after processing the article."
+        try:
+            article = Article(article_url)
+            article.download()
+            article.parse()
+
+            text = article.text
+
+            if len(text) < 200:
+                error = "Article too short to summarize."
+            else:
+                result = summarizer(text[:1024], max_length=150, min_length=50, do_sample=False)
+                summary = result[0]['summary_text']
+
+                images = article.images
+
+        except Exception as e:
+            error = "Could not process the article."
 
     return render_template(
         "index.html",
