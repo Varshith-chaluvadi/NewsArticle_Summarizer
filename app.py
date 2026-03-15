@@ -1,10 +1,15 @@
-from flask import Flask
+from flask import Flask, render_template, request
+from summarizer import summarize_article   # your summarizer function
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def home():
-    return "News Article Summarizer is running!"
+    summary = ""
+    if request.method == "POST":
+        url = request.form["url"]
+        summary = summarize_article(url)
+    return render_template("index.html", summary=summary)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=10000)
