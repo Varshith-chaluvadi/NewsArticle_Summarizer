@@ -1,0 +1,10 @@
+flask==3.0.3
+transformers==4.38.2
+torch
+newspaper3k
+beautifulsoup4
+requests
+lxml
+lxml_html_clean
+gunicorn
+sentencepiece
